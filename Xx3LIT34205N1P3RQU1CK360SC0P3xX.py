@@ -1,41 +1,44 @@
-
+import random
 
 def startTelescope(eventList):
     DP = []  # vector<stack<time>> DP
     DP.append([])   # start event
-
     for i in range(len(eventList)):
         DP.append([])   #append empty list to make a 2d list
-    path = telescope(0 ,0, eventList, DP)
-    # path.pop()   # pop out the 0
-    # for num in path:
-        # print(DP[num])
-    print(len(path))
-    print(path)
-    print(traceback(eventList, path))
+    path = telescope(0 ,0, eventList, DP) # Call on inital position and time
+
+    # print out results
+    print("Maximum Observable Events: ", len(path))
+    print("Events Seen: ", path)
+    print("Path", traceback(eventList, path))
+
+    return path
 
 def telescope(time, position, eventList, DP):
 
-    if(len(DP[time]) != 0): return DP[time]
     PATH = []  # stack Path<time>;
+
+    # loop through all following events
     for eventTime in range(time+1,len(eventList)+1):
-        eventPosition = eventList[eventTime-1]
-        if time == 0 : eventPosition -= 1
-        if (abs(position - eventPosition) <= eventTime-time):
+        eventPosition = eventList[eventTime-1] # time-1 to match array position
+        if time == 0 : eventPosition -= 1       # to account for observing the event
 
-            # if(len(DP[eventTime]) == 0) :
-            telescope(eventTime, eventPosition, eventList, DP)
-            if len(DP[eventTime]) > len(PATH):
+        reachable = abs(position - eventPosition) <= eventTime-time
+        n_reachable = abs(eventPosition - eventList[-1]) <= len(eventList) - eventTime
 
-                PATH = DP[eventTime].copy()
-    DP[time] = PATH.copy()
+        if (reachable and n_reachable): # if reachable
 
-    if (time != 0):  # start is not an event
-        DP[time].append(time)
-    print(DP)
-    # print("DP at time: ", time, " --> ", DP[time])
+            if (len(DP[eventTime]) == 0):   # only call telescope if that event is unvisited
+                telescope(eventTime, eventPosition, eventList, DP)
 
-    return DP[time]
+            if (len(DP[eventTime]) > len(PATH)):  # if the best path so far
+                PATH = DP[eventTime].copy()     # copy to temp PATH holder
+
+    DP[time] = PATH.copy() #copy best path into DP array
+    if (time != 0):             # start is not an event
+        DP[time].append(time)   # so we do not add to DP
+
+    return DP[time] # return the best path
 
 def traceback(eventList, times):
     moves = "{" # init empty string
@@ -64,5 +67,5 @@ def traceback(eventList, times):
 
 eventList =  [ 1,-4,-1, 4, 5, -4, 6, 7,-2]
 eventList2 = [ 0, 0, 0, 4, 3, 3, 8, -1, 6, 8]
-
-startTelescope(eventList)
+eventList3 = [random.randint(-10,10) for i in range(100)]
+startTelescope(eventList2)
